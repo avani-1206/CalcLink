@@ -1,0 +1,10 @@
+{
+  "name": "CalcInk — handwritten math calculator",
+  "short_name": "CalcInk",
+  "description": "Write an equation by hand and get the answer inline. Runs fully on-device.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f7f3e8",
+  "theme_color": "#f7f3e8",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}

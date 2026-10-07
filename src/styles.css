@@ -1,0 +1,251 @@
+/* CalcInk styles — digital-paper look, light + dark themes */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --paper:#f7f3e8;
+  --paper-dark:#1a1d27;
+  --ink:#1d2a44;
+  --ink-dark:#e8eaf0;
+  --rule:rgba(0,0,0,.09);
+  --rule-dark:rgba(255,255,255,.06);
+  --bar:#fff;
+  --bar-dark:#20232f;
+  --border:rgba(0,0,0,.1);
+  --border-dark:rgba(255,255,255,.08);
+  --btn-hover:rgba(0,0,0,.06);
+  --btn-hover-dark:rgba(255,255,255,.08);
+  --accent:#2b5fd9;
+  --accent-fg:#fff;
+  --result:#c2410c;          /* colour for machine-written text (not user ink) */
+  --result-dark:#fb923c;
+  --r:8px;
+  --sh:0 1px 3px rgba(0,0,0,.08),0 2px 8px rgba(0,0,0,.05);
+
+  /* resolved tokens */
+  --C-paper:var(--paper);
+  --C-ink:var(--ink);
+  --C-rule:var(--rule);
+  --C-bar:var(--bar);
+  --C-border:var(--border);
+  --C-hover:var(--btn-hover);
+  --C-result:var(--result);
+  --C-margin:rgba(220,80,80,.28);
+  --grain:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .35 0 0 0 0 .3 0 0 0 0 .2 0 0 0 .07 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+html.dark{
+  --C-paper:var(--paper-dark);
+  --C-ink:var(--ink-dark);
+  --C-rule:var(--rule-dark);
+  --C-bar:var(--bar-dark);
+  --C-border:var(--border-dark);
+  --C-hover:var(--btn-hover-dark);
+  --C-result:var(--result-dark);
+  --C-margin:rgba(255,120,120,.16);
+}
+
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#stage{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+body{
+  display:flex;flex-direction:column;
+  background:var(--C-paper);
+  color:var(--C-ink);
+  font:13px/1 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  transition:background .15s,color .15s;
+}
+
+/* ── TOOLBAR ── */
+#bar{
+  display:flex;align-items:center;gap:2px;
+  user-select:none;-webkit-user-select:none;   /* a drag that starts here never selects text */
+  padding:5px 8px;
+  background:var(--C-bar);
+  border-bottom:1px solid var(--C-border);
+  box-shadow:var(--sh);
+  z-index:10;
+  overflow-x:auto;scrollbar-width:none;
+  flex-shrink:0;
+  transition:background .15s,border-color .15s;
+}
+#bar::-webkit-scrollbar{display:none}
+
+.sep{width:1px;min-width:1px;height:20px;background:var(--C-border);margin:0 5px;flex-shrink:0}
+
+.btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:5px 9px;border:none;border-radius:var(--r);
+  background:transparent;color:inherit;cursor:pointer;
+  font:inherit;font-weight:500;white-space:nowrap;flex-shrink:0;
+  transition:background .1s;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+.btn:hover{background:var(--C-hover)}
+.btn[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg);box-shadow:0 1px 4px rgba(43,95,217,.35)}
+.btn:disabled{opacity:.35;pointer-events:none}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* model status dot inside the Recognize button */
+.dot{width:7px;height:7px;border-radius:50%;background:#9ca3af;flex-shrink:0}
+.dot[data-s="ready"]{background:#16a34a}
+.dot[data-s="loading"]{background:#eab308;animation:pulse 1s infinite}
+.dot[data-s="error"]{background:#dc2626}
+@keyframes pulse{50%{opacity:.3}}
+
+/* sliders */
+.group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.group label{font-size:11px;opacity:.55;white-space:nowrap}
+input[type=range]{
+  -webkit-appearance:none;appearance:none;
+  width:76px;height:4px;
+  background:var(--C-hover);border-radius:2px;cursor:pointer;flex-shrink:0;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:13px;height:13px;border-radius:50%;
+  background:var(--accent);box-shadow:0 1px 3px rgba(0,0,0,.25);
+}
+input[type=range]:focus-visible{outline:2px solid var(--accent);outline-offset:4px;border-radius:3px}
+.val{min-width:26px;text-align:right;opacity:.5;font-size:12px}
+
+/* palette */
+#palette{display:flex;gap:4px;align-items:center;flex-shrink:0}
+.sw{
+  width:19px;height:19px;border-radius:50%;border:2px solid transparent;
+  cursor:pointer;flex-shrink:0;transition:transform .1s,border-color .1s,box-shadow .1s;
+  outline:none;-webkit-tap-highlight-color:transparent;
+}
+.sw:hover{transform:scale(1.18)}
+.sw.on{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent);transform:scale(1.18)}
+#cp{
+  width:22px;height:22px;padding:0;border:none;border-radius:50%;
+  cursor:pointer;background:none;flex-shrink:0;overflow:hidden;
+}
+#cp::-webkit-color-swatch-wrapper{padding:0}
+#cp::-webkit-color-swatch{border:none;border-radius:50%}
+
+/* ── STAGE ── */
+#stage{
+  flex:1;position:relative;overflow:hidden;
+  background-color:var(--C-paper);
+  /* paper: fine grain (SVG noise) · red margin line · ruled lines */
+  background-image:
+    var(--grain),
+    linear-gradient(90deg,transparent 47px,var(--C-margin) 47px,var(--C-margin) 48px,transparent 48px),
+    linear-gradient(var(--C-rule) 1px,transparent 1px);
+  background-size:180px 180px,100% 100%,100% 36px;
+  transition:background-color .15s;
+}
+
+/* THE CANVAS — touch-action:none stops the browser from scrolling/zooming while we draw */
+#ink{
+  position:absolute;inset:0;width:100%;height:100%;
+  touch-action:none;display:block;
+  cursor:crosshair;
+}
+
+/* overlays sit on top of the canvas but never block drawing (pointer-events:none) */
+#labels,#results{position:absolute;inset:0;pointer-events:none;z-index:4}
+
+/* debug labels: "what the model read" (toggle with R) */
+.lbl{
+  position:absolute;
+  font:600 11px/1.2 ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color:var(--accent);
+  background:color-mix(in srgb,var(--C-paper) 85%,transparent);
+  padding:2px 5px;border-radius:5px;
+  border:1px dashed color-mix(in srgb,var(--accent) 45%,transparent);
+  white-space:nowrap;
+  animation:fadeIn .25s ease-out;
+}
+.lbl .low{text-decoration:underline wavy;text-underline-offset:3px;opacity:.75}
+@keyframes fadeIn{from{opacity:0;transform:translateY(3px)}to{opacity:1;transform:none}}
+
+/* computed answers — a different font + colour so they never look like user ink */
+.res{
+  position:absolute;
+  transform:translateY(-50%);
+  font-family:ui-rounded,"SF Pro Rounded","Nunito","Segoe UI Variable Display","Segoe UI",system-ui,sans-serif;
+  font-weight:650;line-height:1;
+  color:var(--C-result);
+  white-space:nowrap;
+  animation:resIn .45s cubic-bezier(.2,.8,.2,1);
+}
+.res.undef{font-style:italic;font-weight:500;opacity:.85}
+.res.err{color:color-mix(in srgb,var(--C-ink) 40%,transparent);font-weight:500}
+@keyframes resIn{
+  from{opacity:0;transform:translate(-6px,-50%);filter:blur(3px);clip-path:inset(0 100% 0 0)}
+  60%{opacity:1;filter:none}
+  to{opacity:1;transform:translateY(-50%);clip-path:inset(0 0 0 0)}
+}
+
+/* cursor ring */
+#ring{
+  position:absolute;pointer-events:none;z-index:5;
+  border-radius:50%;border:1.5px solid rgba(43,95,217,.65);
+  transform:translate(-50%,-50%);
+  display:none;
+}
+
+/* toast */
+#toast{
+  position:absolute;bottom:22px;left:50%;transform:translateX(-50%);
+  background:var(--C-ink);color:var(--C-paper);
+  padding:5px 14px;border-radius:20px;font-size:12px;
+  opacity:0;pointer-events:none;z-index:30;
+  transition:opacity .22s;white-space:nowrap;
+}
+#toast.on{opacity:1}
+
+/* low-confidence answers: a dotted underline says "double-check me" */
+.res.unsure{text-decoration:underline dotted;text-decoration-thickness:2px;text-underline-offset:.18em}
+
+/* mini graph for  y = f(x)  lines */
+.plot{
+  position:absolute;transform:translateY(-50%);
+  border-radius:10px;
+  background:color-mix(in srgb,var(--C-paper) 88%,transparent);
+  border:1px solid color-mix(in srgb,var(--C-result) 30%,transparent);
+  box-shadow:0 2px 10px rgba(0,0,0,.06);
+  animation:resIn .45s cubic-bezier(.2,.8,.2,1);
+}
+
+/* model status chip text (hidden on narrow screens) */
+@media (max-width:640px){
+  .group label{display:none}
+  input[type=range]{width:56px}
+}
+@media (prefers-reduced-motion:reduce){
+  .res,.plot,.lbl{animation:none}
+}
+
+
+/* BODMAS steps card under an answer */
+.steps{
+  position:absolute;
+  font:500 12px/1.55 ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  color:color-mix(in srgb,var(--C-ink) 72%,transparent);
+  background:color-mix(in srgb,var(--C-paper) 90%,transparent);
+  border-left:2px solid var(--C-result);
+  padding:3px 8px 3px 6px;border-radius:0 6px 6px 0;
+  white-space:nowrap;pointer-events:none;
+  animation:fadeIn .3s ease-out;
+}
+.steps .rule{
+  display:inline-block;width:15px;margin-right:6px;text-align:center;
+  font-weight:700;font-size:10px;border-radius:3px;
+  color:var(--accent-fg);background:var(--C-result);
+}
+
+/* first-visit hint, hidden as soon as there is ink */
+#hint{
+  position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);
+  text-align:center;pointer-events:none;
+  color:color-mix(in srgb,var(--C-ink) 38%,transparent);
+  font:400 15px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  transition:opacity .4s;
+}
+#hint b{display:block;font:600 30px/1.3 ui-rounded,"SF Pro Rounded","Segoe UI",system-ui,sans-serif;color:color-mix(in srgb,var(--C-ink) 55%,transparent);margin-bottom:6px}
+#hint.gone{opacity:0}
+
+/* toolbar: secondary labels collapse to icons on narrower screens (tooltips keep the names) */
+@media (max-width:1280px){ #bUndo .t,#bRedo .t,#bClear .t,#bExport .t,#bSteps .t,#bRec .t{display:none} }
+@media (max-width:880px){ .btn .t{display:none} .btn{padding:6px 7px} .group label,.val{display:none} input[type=range]{width:54px} .sep{margin:0 3px} .sw{width:17px;height:17px} }
