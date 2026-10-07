@@ -1,0 +1,20 @@
+{
+  "name": "calcink",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CalcInk — on-device handwritten math calculator (digital ink + edge ML, 100% client-side)",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node scripts/vendor-ort.js",
+    "dev": "node scripts/serve.js",
+    "build": "node scripts/build.js",
+    "preview": "node scripts/serve.js dist/site",
+    "test": "node --test"
+  },
+  "devDependencies": {
+    "onnxruntime-web": "1.20.1"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
